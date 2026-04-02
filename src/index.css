@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Times New Roman", Times, serif;
+  --color-gold-sand: #F4EBD0;
+  --color-gold-rich: #D4AF37;
+  --color-gold-dark: #996515;
+  --color-gold-light: #F9F4E8;
+  
+  --color-dark-bg: #0F0F0F;
+  --color-dark-card: #1A1A1A;
+  --color-dark-border: #333333;
+  --color-dark-text: #E0E0E0;
+}
+
+@layer base {
+  body {
+    @apply bg-gold-sand text-[#1A1A1A] font-serif text-lg transition-colors duration-300;
+  }
+  
+  .dark body {
+    @apply bg-dark-bg text-dark-text;
+  }
+
+  .prose-container {
+    @apply bg-white p-16 shadow-inner min-h-[800px] mx-auto transition-all duration-500;
+    width: 210mm; /* A4 width */
+    max-width: 100%;
+  }
+
+  .dark .prose-container {
+    @apply bg-[#FDFDFD] shadow-2xl; /* Keep paper white even in dark mode for readability of "black font" */
+  }
+
+  .prose h1 {
+    @apply text-black text-center mb-12 uppercase tracking-[0.15em] leading-tight font-bold;
+    font-size: 24pt;
+    font-family: "Times New Roman", serif;
+  }
+  .prose h2 {
+    @apply text-black mt-12 mb-6 border-b-2 border-black pb-3 tracking-wide font-bold;
+    font-size: 18pt;
+    font-family: "Times New Roman", serif;
+  }
+  .prose p {
+    @apply text-black mb-6 text-justify;
+    font-size: 12pt;
+    line-height: 1.5;
+    font-family: "Times New Roman", serif;
+  }
+  .prose strong {
+    @apply font-bold text-black;
+  }
+  .prose li {
+    @apply text-black mb-3;
+    font-size: 12pt;
+    line-height: 1.5;
+    font-family: "Times New Roman", serif;
+  }
+}
+
+.gold-gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-gold-dark via-gold-rich to-gold-dark;
+}
+
+.gold-shadow {
+  box-shadow: 0 10px 40px rgba(153, 101, 21, 0.2);
+}
+
+.paper-texture {
+  background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+}
+
+.vibrant-card {
+  @apply bg-white/90 backdrop-blur-xl border border-gold-rich/30 rounded-[2.5rem] shadow-2xl transition-all duration-500 hover:shadow-gold-rich/20;
+}
+
+.dark .vibrant-card {
+  @apply bg-dark-card/90 border-dark-border shadow-black/40;
+}
+
+.dark .gold-gradient-text {
+  @apply from-gold-rich via-gold-light to-gold-rich;
+}
+
+.dark .bg-gold-light\/90 {
+  @apply bg-dark-card/95;
+}
+
+.dark .bg-gold-light\/30 {
+  @apply bg-dark-bg/50;
+}
+
+.dark .bg-gold-light\/50 {
+  @apply bg-dark-card/80;
+}
+
+.dark .text-gold-dark {
+  @apply text-gold-rich;
+}
+
+.dark .text-gold-dark\/60 {
+  @apply text-gold-light/60;
+}
+
+.dark .text-gold-dark\/40 {
+  @apply text-gold-light/40;
+}
+
+.dark .bg-white\/50 {
+  @apply bg-dark-bg/40;
+}
+
+.dark .bg-white\/80 {
+  @apply bg-dark-bg/60;
+}
+
+.dark .bg-white\/30 {
+  @apply bg-dark-bg/30;
+}
+
+.elegant-button {
+  @apply px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-xl;
+}
