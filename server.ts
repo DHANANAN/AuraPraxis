@@ -13,13 +13,13 @@ const FALLBACK_API_KEY = process.env.GEMINI_API_FALLBACK_KEY || "";
 const startupKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
 const isStartupKeyValid = 
   startupKey && 
-  (startupKey.startsWith("AIzaSy") || startupKey.startsWith("AlzaSy")) && 
+  (startupKey.startsWith("AIzaSy")) && 
   !startupKey.startsWith("AIzaSyCF2X") && 
   !startupKey.includes("CF2X");
 
 const isFallbackKeyValid = 
   FALLBACK_API_KEY && 
-  (FALLBACK_API_KEY.startsWith("AIzaSy") || FALLBACK_API_KEY.startsWith("AlzaSy")) && 
+  (FALLBACK_API_KEY.startsWith("AIzaSy")) && 
   !FALLBACK_API_KEY.startsWith("AIzaSyCF2X") && 
   !FALLBACK_API_KEY.includes("CF2X");
 
@@ -29,6 +29,7 @@ if (!isStartupKeyValid) {
     console.log("Initialized GEMINI_API_KEY on startup to fallback API key.");
   } else {
     console.error("ERROR: No valid API key configured. Please set either GEMINI_API_KEY or GEMINI_API_FALLBACK_KEY in your .env file with a valid Gemini API key.");
+    process.exit(1);
   }
 }
 
@@ -106,7 +107,7 @@ async function startServer() {
         serializedError.includes("auth") ||
         serializedError.includes("credential");
 
-      if (isAuthError && primeKey !== FALLBACK_API_KEY && FALLBACK_API_KEY) {
+      if (isAuthError && primeKey !== FALLBACK_API_KEY && isFallbackKeyValid) {
         try {
           console.log("Attempting failover to configured fallback key...");
           process.env.GEMINI_API_KEY = FALLBACK_API_KEY;
