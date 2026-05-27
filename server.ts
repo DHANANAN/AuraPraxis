@@ -7,28 +7,31 @@ import compression from "compression";
 
 dotenv.config();
 
-const FALLBACK_API_KEY = process.env.GEMINI_API_FALLBACK_KEY || "";
+function isValidApiKey(key: string | undefined): boolean {
+  if (!key || typeof key !== 'string') {
+    return false;
+  }
+  const trimmedKey = key.trim().replace(/^['"]|['"]$/g, '');
+  return (
+    trimmedKey.startsWith("AIzaSy") &&
+    !trimmedKey.startsWith("AIzaSyCF2X") &&
+    !trimmedKey.includes("CF2X")
+  );
+}
+
+const FALLBACK_API_KEY = (process.env.GEMINI_API_FALLBACK_KEY || "").trim();
 
 // Ensure the process has a valid key on startup
 const startupKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
-const isStartupKeyValid = 
-  startupKey && 
-  (startupKey.startsWith("AIzaSy")) && 
-  !startupKey.startsWith("AIzaSyCF2X") && 
-  !startupKey.includes("CF2X");
-
-const isFallbackKeyValid = 
-  FALLBACK_API_KEY && 
-  (FALLBACK_API_KEY.startsWith("AIzaSy")) && 
-  !FALLBACK_API_KEY.startsWith("AIzaSyCF2X") && 
-  !FALLBACK_API_KEY.includes("CF2X");
+const isStartupKeyValid = isValidApiKey(startupKey);
+const isFallbackKeyValid = isValidApiKey(FALLBACK_API_KEY);
 
 if (!isStartupKeyValid) {
   if (isFallbackKeyValid) {
     process.env.GEMINI_API_KEY = FALLBACK_API_KEY;
     console.log("Initialized GEMINI_API_KEY on startup to fallback API key.");
   } else {
-    console.error("ERROR: No valid API key configured. Please set either GEMINI_API_KEY or GEMINI_API_FALLBACK_KEY in your .env file with a valid Gemini API key.");
+    console.error("ERROR: No valid API key configured. Please set either GEMINI_API_KEY or GEMINI_API_FALLBACK_KEY in your .env file with a valid Gemini API key starting with 'AIzaSy'.");
     process.exit(1);
   }
 }
