@@ -1,62 +1,75 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Times New Roman", Times, serif;
+  --font-serif: "Playfair Display", serif;
   --color-gold-sand: #F4EBD0;
   --color-gold-rich: #D4AF37;
   --color-gold-dark: #996515;
   --color-gold-light: #F9F4E8;
   
-  --color-dark-bg: #0F0F0F;
-  --color-dark-card: #1A1A1A;
-  --color-dark-border: #333333;
-  --color-dark-text: #E0E0E0;
+  --color-dark-bg: #0A0A0A;
+  --color-dark-card: #141414;
+  --color-dark-border: #262626;
+  --color-dark-text: #E5E5E5;
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px; /* Base for rem */
+  }
+
+  /* Fluid Base for Mobile Shrinkage */
+  @media (max-width: 640px) {
+    html {
+      font-size: 14px; /* Global scale-down for mobile assets */
+    }
+  }
+
   body {
-    @apply bg-gold-sand text-[#1A1A1A] font-serif text-lg transition-colors duration-300;
+    @apply bg-gold-sand text-[#1A1A1A] font-sans text-base transition-colors duration-300 antialiased selection:bg-gold-rich/30;
   }
   
   .dark body {
     @apply bg-dark-bg text-dark-text;
   }
 
+  /* The Bonsai Document Container */
   .prose-container {
-    @apply bg-white p-16 shadow-inner min-h-[800px] mx-auto transition-all duration-500;
-    width: 210mm; /* A4 width */
-    max-width: 100%;
+    @apply bg-white shadow-inner min-h-[800px] mx-auto transition-all duration-500 ring-1 ring-gold-rich/10;
+    padding: clamp(1.5rem, 6vw, 6rem);
+    width: 100%;
+    max-width: 800px; /* More curated width for "Bonsai" feel */
   }
 
   .dark .prose-container {
-    @apply bg-[#FDFDFD] shadow-2xl; /* Keep paper white even in dark mode for readability of "black font" */
+    @apply bg-[#FCFAF5] shadow-2xl ring-gold-rich/20; 
   }
 
   .prose h1 {
-    @apply text-black text-center mb-12 uppercase tracking-[0.15em] leading-tight font-bold;
-    font-size: 24pt;
-    font-family: "Times New Roman", serif;
+    @apply text-black text-center mb-8 uppercase tracking-[0.25em] leading-tight font-black italic;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-family: var(--font-serif);
   }
   .prose h2 {
-    @apply text-black mt-12 mb-6 border-b-2 border-black pb-3 tracking-wide font-bold;
-    font-size: 18pt;
-    font-family: "Times New Roman", serif;
+    @apply text-black mt-10 mb-5 border-b border-black/20 pb-2 tracking-widest font-bold uppercase;
+    font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+    font-family: var(--font-serif);
   }
   .prose p {
-    @apply text-black mb-6 text-justify;
-    font-size: 12pt;
-    line-height: 1.5;
-    font-family: "Times New Roman", serif;
+    @apply text-black mb-5 text-justify leading-relaxed;
+    font-size: clamp(0.95rem, 3.5vw, 1.05rem); 
+    font-family: var(--font-serif);
   }
   .prose strong {
-    @apply font-bold text-black;
+    @apply font-black text-black;
   }
   .prose li {
-    @apply text-black mb-3;
-    font-size: 12pt;
-    line-height: 1.5;
-    font-family: "Times New Roman", serif;
+    @apply text-black mb-3 ml-5 list-decimal marker:font-black;
+    font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+    font-family: var(--font-serif);
   }
 }
 
@@ -73,7 +86,7 @@
 }
 
 .vibrant-card {
-  @apply bg-white/90 backdrop-blur-xl border border-gold-rich/30 rounded-[2.5rem] shadow-2xl transition-all duration-500 hover:shadow-gold-rich/20;
+  @apply bg-white/90 backdrop-blur-xl border border-gold-rich/30 rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-gold-rich/20;
 }
 
 .dark .vibrant-card {
@@ -121,5 +134,22 @@
 }
 
 .elegant-button {
-  @apply px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-xl;
+  @apply px-4 py-2 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-xl;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gold-sand;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gold-rich/30 rounded-full hover:bg-gold-rich/50 transition-colors;
 }

@@ -3,7 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+    <title>AuraPraxis - Elite Legal Workspace</title>
+    <script>
+      // Capture and suppress benign Vite HMR websocket/ResizeObserver errors at the earliest possible stage
+      (function() {
+        const isBenign = function(err) {
+          if (!err) return false;
+          var msg = (typeof err === 'string' ? err : (err.message || err.reason?.message || String(err))).toLowerCase();
+          return msg.includes('resizeobserver') || 
+                 msg.includes('websocket') ||
+                 msg.includes('web socket') ||
+                 msg.includes('closed without opened');
+        };
+
+        window.addEventListener('error', function(e) {
+          if (isBenign(e.error || e.message)) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          var reason = e.reason || (e.detail && e.detail.reason);
+          if (isBenign(reason)) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,59 +1,128 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
+import compression from "compression";
+
+dotenv.config();
+
+const USER_FALLBACK_KEY = "AIzaSyDjp4o1irN8h6u1HhNasqZ0aTQx_quUnxU";
+
+// Ensure the process has a valid key on startup
+const startupKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
+const isStartupKeyValid = 
+  startupKey && 
+  (startupKey.startsWith("AIzaSy") || startupKey.startsWith("AlzaSy")) && 
+  !startupKey.startsWith("AIzaSyCF2X") && 
+  !startupKey.includes("CF2X");
+
+if (!isStartupKeyValid) {
+  process.env.GEMINI_API_KEY = USER_FALLBACK_KEY;
+  console.log("Initialized GEMINI_API_KEY on startup to user's active developer key.");
+}
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  const deepseek = new OpenAI({
-    apiKey: process.env.DEEPSEEK_API_KEY || "sk-d17acdb2e2b843a9bec355ee77993b96", // Default as provided by user
-    baseURL: "https://api.deepseek.com",
-  });
-
+  app.use(compression());
   app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  function getCleanEnvKey(): string | null {
+    let key = process.env.GEMINI_API_KEY;
+    if (key) {
+      key = key.trim().replace(/^['"]|['"]$/g, '');
+    }
+    // Filter out known inactive or invalid container placeholder keys
+    if (key && (key.startsWith("AIzaSyCF2X") || key.includes("CF2X"))) {
+      return null;
+    }
+    if (key && (key.startsWith("AIzaSy") || key.startsWith("AlzaSy"))) {
+      return key;
+    }
+    return null;
+  }
+
+  function getClient(apiKey: string): GoogleGenAI {
+    return new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+
+  // API Proxy for Gemini (Protects the API key and implements failover)
+  app.post("/api/gemini", async (req, res) => {
+    const { model, contents, config } = req.body;
+    const envKey = getCleanEnvKey();
+    
+    // We try the clean envKey first if present, else fallback immediately to the user's provided key
+    const primeKey = envKey || USER_FALLBACK_KEY;
+    
+    try {
+      process.env.GEMINI_API_KEY = primeKey;
+      const ai = getClient(primeKey);
+      
+      const response = await ai.models.generateContent({
+        model,
+        contents,
+        config,
+      });
+
+      return res.json({ text: response.text });
+    } catch (firstError: any) {
+      console.warn("Gemini call failed with primary API key. Attempting fallback failover...", firstError.message || firstError);
+      
+      const errorMsg = firstError.message || "";
+      let errorMsgStr = "";
+      try {
+        errorMsgStr = (firstError.message || "") + " " + (firstError.stack || "") + " " + JSON.stringify(firstError);
+      } catch (e) {
+        errorMsgStr = (firstError.message || "") + " " + (firstError.stack || "");
+      }
+      const serializedError = errorMsgStr.toLowerCase();
+      
+      const isAuthError = 
+        !envKey ||
+        serializedError.includes("api key") || 
+        serializedError.includes("api_key_invalid") || 
+        serializedError.includes("invalid_argument") ||
+        serializedError.includes("not found") ||
+        serializedError.includes("auth") ||
+        serializedError.includes("credential");
+
+      if (isAuthError && primeKey !== USER_FALLBACK_KEY) {
+        try {
+          console.log("Attempting failover to active user fallback key...");
+          process.env.GEMINI_API_KEY = USER_FALLBACK_KEY;
+          const aiFallback = getClient(USER_FALLBACK_KEY);
+          
+          const responseFallback = await aiFallback.models.generateContent({
+            model,
+            contents,
+            config,
+          });
+
+          console.log("Failover successful!");
+          return res.json({ text: responseFallback.text });
+        } catch (secondError: any) {
+          console.error("Gemini fallback run also failed:", secondError);
+          return res.status(500).json({ error: secondError.message || "AI Request failed after fallback retry." });
+        }
+      } else {
+        return res.status(500).json({ error: errorMsg || "AI Request failed." });
+      }
+    }
+  });
 
   // API routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
-  });
-
-  app.post("/api/generate", async (req, res) => {
-    const { title, idea, docType, citationStyle } = req.body;
-    try {
-      const prompt = `
-        You are a world-class legal writer. Generate a comprehensive legal document based on the following:
-        Title: ${title}
-        Idea/Sentence: ${idea}
-        Document Type: ${docType}
-        Citation Style: ${citationStyle}
-
-        REQUIREMENTS:
-        1. The document must be at least 1500 words long.
-        2. Use professional, academic-grade legal language.
-        3. Follow the standard structure for the requested document type.
-        4. Use the requested citation style accurately.
-        5. Return the output in Markdown format.
-        6. DO NOT include any conversational filler or meta-talk.
-        7. Ensure the tone is formal and authoritative.
-      `;
-
-      const response = await deepseek.chat.completions.create({
-        model: "deepseek-chat",
-        messages: [
-          { role: "system", content: "You are a specialized legal document generator. You produce extremely detailed, high-quality legal content." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 4096,
-      });
-
-      res.json({ text: response.choices[0].message.content });
-    } catch (error) {
-      console.error("DeepSeek generation error:", error);
-      res.status(500).json({ error: "Failed to generate document" });
-    }
   });
 
   // Vite middleware for development
