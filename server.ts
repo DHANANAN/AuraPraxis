@@ -7,7 +7,7 @@ import compression from "compression";
 
 dotenv.config();
 
-const USER_FALLBACK_KEY = process.env.GEMINI_API_FALLBACK_KEY || "";
+const FALLBACK_API_KEY = process.env.GEMINI_API_FALLBACK_KEY || "";
 
 // Ensure the process has a valid key on startup
 const startupKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
@@ -18,9 +18,9 @@ const isStartupKeyValid =
   !startupKey.includes("CF2X");
 
 if (!isStartupKeyValid) {
-  if (USER_FALLBACK_KEY) {
-    process.env.GEMINI_API_KEY = USER_FALLBACK_KEY;
-    console.log("Initialized GEMINI_API_KEY on startup to user's active developer key.");
+  if (FALLBACK_API_KEY) {
+    process.env.GEMINI_API_KEY = FALLBACK_API_KEY;
+    console.log("Initialized GEMINI_API_KEY on startup to fallback API key.");
   } else {
     console.warn("No fallback API key configured. Please set GEMINI_API_FALLBACK_KEY in your .env file.");
   }
@@ -65,8 +65,8 @@ async function startServer() {
     const { model, contents, config } = req.body;
     const envKey = getCleanEnvKey();
     
-    // We try the clean envKey first if present, else fallback immediately to the user's provided key
-    const primeKey = envKey || USER_FALLBACK_KEY;
+    // We try the clean envKey first if present, else fallback immediately to the configured fallback key
+    const primeKey = envKey || FALLBACK_API_KEY;
     
     try {
       process.env.GEMINI_API_KEY = primeKey;
@@ -100,11 +100,11 @@ async function startServer() {
         serializedError.includes("auth") ||
         serializedError.includes("credential");
 
-      if (isAuthError && primeKey !== USER_FALLBACK_KEY) {
+      if (isAuthError && primeKey !== FALLBACK_API_KEY) {
         try {
-          console.log("Attempting failover to active user fallback key...");
-          process.env.GEMINI_API_KEY = USER_FALLBACK_KEY;
-          const aiFallback = getClient(USER_FALLBACK_KEY);
+          console.log("Attempting failover to configured fallback key...");
+          process.env.GEMINI_API_KEY = FALLBACK_API_KEY;
+          const aiFallback = getClient(FALLBACK_API_KEY);
           
           const responseFallback = await aiFallback.models.generateContent({
             model,
