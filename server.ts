@@ -7,7 +7,7 @@ import compression from "compression";
 
 dotenv.config();
 
-const USER_FALLBACK_KEY = "AIzaSyDjp4o1irN8h6u1HhNasqZ0aTQx_quUnxU";
+const USER_FALLBACK_KEY = process.env.GEMINI_API_FALLBACK_KEY || "";
 
 // Ensure the process has a valid key on startup
 const startupKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
@@ -18,8 +18,12 @@ const isStartupKeyValid =
   !startupKey.includes("CF2X");
 
 if (!isStartupKeyValid) {
-  process.env.GEMINI_API_KEY = USER_FALLBACK_KEY;
-  console.log("Initialized GEMINI_API_KEY on startup to user's active developer key.");
+  if (USER_FALLBACK_KEY) {
+    process.env.GEMINI_API_KEY = USER_FALLBACK_KEY;
+    console.log("Initialized GEMINI_API_KEY on startup to user's active developer key.");
+  } else {
+    console.warn("No fallback API key configured. Please set GEMINI_API_FALLBACK_KEY in your .env file.");
+  }
 }
 
 async function startServer() {
