@@ -12,18 +12,17 @@ function isValidApiKey(key: string | undefined): boolean {
     return false;
   }
   const trimmedKey = key.trim().replace(/^['"]|['"]$/g, '');
+  // Valid Gemini API keys start with AIzaSy, but we exclude test/placeholder keys that start with AIzaSyCF2X
   return (
     trimmedKey.startsWith("AIzaSy") &&
-    !trimmedKey.startsWith("AIzaSyCF2X") &&
-    !trimmedKey.includes("CF2X")
+    !trimmedKey.startsWith("AIzaSyCF2X")
   );
 }
 
 const FALLBACK_API_KEY = (process.env.GEMINI_API_FALLBACK_KEY || "").trim();
 
 // Ensure the process has a valid key on startup
-const startupKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
-const isStartupKeyValid = isValidApiKey(startupKey);
+const isStartupKeyValid = isValidApiKey(process.env.GEMINI_API_KEY);
 const isFallbackKeyValid = isValidApiKey(FALLBACK_API_KEY);
 
 if (!isStartupKeyValid) {
