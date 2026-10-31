@@ -3,21 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AuraPraxis - Elite Legal Workspace</title>
+    <title>AuraPraxis – Legal Structures Engine</title>
+    <meta name="description" content="Generates authentic legal documents and study aids using a specialized legal reference corpus." />
+    <meta property="og:title" content="AuraPraxis – Legal Structures Engine" />
+    <meta property="og:description" content="Generates authentic legal documents and study aids using a specialized legal reference corpus." />
     <script>
-      // Capture and suppress benign Vite HMR websocket/ResizeObserver errors at the earliest possible stage
       (function() {
-        const isBenign = function(err) {
-          if (!err) return false;
-          var msg = (typeof err === 'string' ? err : (err.message || err.reason?.message || String(err))).toLowerCase();
-          return msg.includes('resizeobserver') || 
-                 msg.includes('websocket') ||
-                 msg.includes('web socket') ||
-                 msg.includes('closed without opened');
+        try {
+          if (localStorage.getItem('aura_dark_mode') === 'true') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      vite-error-overlay, [id="vite-error-overlay"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+    </style>
+    <script>
+      // Prevent sandboxing-related WebSocket and HMR errors from polluting logs or triggering dialogs
+      (function() {
+        // 1. Suppress custom elements to prevent intrusive Vite error overlays
+        if (typeof window !== 'undefined' && window.customElements && window.customElements.define) {
+          const originalDefine = window.customElements.define;
+          window.customElements.define = function(name, constructor, options) {
+            if (name === 'vite-error-overlay') {
+              class DummyElement extends HTMLElement {
+                connectedCallback() {
+                  this.style.display = 'none';
+                }
+              }
+              return originalDefine.call(this, name, DummyElement, options);
+            }
+            return originalDefine.call(this, name, constructor, options);
+          };
+        }
+
+        const isBenign = function(str) {
+          if (!str) return false;
+          var normalized = String(str).toLowerCase();
+          return normalized.includes('websocket') || 
+                 normalized.includes('web socket') || 
+                 normalized.includes('closed without opened') || 
+                 normalized.includes('resizeobserver');
         };
 
+        const checkValue = function(val) {
+          if (!val) return false;
+          if (typeof val === 'string') return isBenign(val);
+          if (val.message) return isBenign(val.message);
+          if (val.reason?.message) return isBenign(val.reason.message);
+          try {
+            return isBenign(JSON.stringify(val));
+          } catch (e) {
+            return isBenign(String(val));
+          }
+        };
+
+        // Suppress window/promise events
         window.addEventListener('error', function(e) {
-          if (isBenign(e.error || e.message)) {
+          if (checkValue(e.error) || checkValue(e.message)) {
             e.stopImmediatePropagation();
             e.preventDefault();
           }
@@ -25,11 +76,99 @@
 
         window.addEventListener('unhandledrejection', function(e) {
           var reason = e.reason || (e.detail && e.detail.reason);
-          if (isBenign(reason)) {
+          if (checkValue(reason)) {
             e.stopImmediatePropagation();
             e.preventDefault();
           }
         }, true);
+
+        // Suppress console-level output for the same errors
+        const patchConsole = function(method) {
+          const original = console[method];
+          if (!original) return;
+          console[method] = function() {
+            var args = Array.prototype.slice.call(arguments);
+            for (var i = 0; i < args.length; i++) {
+              if (checkValue(args[i])) {
+                return; // suppress entire log if any argument matches benign error
+              }
+            }
+            original.apply(console, arguments);
+          };
+        };
+        patchConsole('error');
+        patchConsole('warn');
+
+        // 2. Dummy WebSocket implementation to satisfy Vite's HMR client loop silently
+        class MockWebSocket {
+          constructor(url, protocols) {
+            this.url = url;
+            this.protocols = protocols;
+            this.readyState = 0; // CONNECTING
+            this.binaryType = 'blob';
+            this._listeners = {};
+
+            // Transition gracefully to OPEN so Vite client believes it connected successfully
+            setTimeout(() => {
+              this.readyState = 1; // OPEN
+              const openEvt = { type: 'open', target: this };
+              if (this.onopen) {
+                try { this.onopen(openEvt); } catch (e) {}
+              }
+              this.dispatchEvent('open', openEvt);
+            }, 50);
+          }
+
+          addEventListener(type, listener) {
+            if (!this._listeners[type]) this._listeners[type] = [];
+            this._listeners[type].push(listener);
+          }
+
+          removeEventListener(type, listener) {
+            if (!this._listeners[type]) return;
+            const idx = this._listeners[type].indexOf(listener);
+            if (idx !== -1) {
+              this._listeners[type].splice(idx, 1);
+            }
+          }
+
+          dispatchEvent(type, event) {
+            if (this._listeners[type]) {
+              var list = this._listeners[type].slice();
+              for (var i = 0; i < list.length; i++) {
+                try { list[i](event); } catch (e) {}
+              }
+            }
+          }
+
+          send(data) { /* No-op */ }
+          close() {
+            this.readyState = 3; // CLOSED
+          }
+        }
+
+        const NativeWebSocket = window.WebSocket;
+        if (NativeWebSocket) {
+          window.WebSocket = function(url, protocols) {
+            var isViteHmr = url && (
+              url.indexOf('vite') !== -1 ||
+              protocols === 'vite-hmr' ||
+              (typeof protocols === 'string' && protocols.indexOf('vite') !== -1) ||
+              (Array.isArray(protocols) && protocols.indexOf('vite-hmr') !== -1)
+            );
+
+            if (isViteHmr) {
+              return new MockWebSocket(url, protocols);
+            }
+
+            return new NativeWebSocket(url, protocols);
+          };
+          window.WebSocket.prototype = NativeWebSocket.prototype;
+          window.WebSocket.CONNECTING = NativeWebSocket.CONNECTING ?? 0;
+          window.WebSocket.OPEN = NativeWebSocket.OPEN ?? 1;
+          window.WebSocket.CLOSING = NativeWebSocket.CLOSING ?? 2;
+          window.WebSocket.CLOSED = NativeWebSocket.CLOSED ?? 3;
+        }
       })();
     </script>
   </head>

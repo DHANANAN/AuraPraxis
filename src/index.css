@@ -1,155 +1,333 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@custom-variant dark (&:where(.dark, .dark *));
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap');
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
-  --color-gold-sand: #F4EBD0;
-  --color-gold-rich: #D4AF37;
-  --color-gold-dark: #996515;
-  --color-gold-light: #F9F4E8;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
   
-  --color-dark-bg: #0A0A0A;
-  --color-dark-card: #141414;
-  --color-dark-border: #262626;
-  --color-dark-text: #E5E5E5;
+  --color-gold-sand: #F7F2E7;
+  --color-gold-rich: #B45309;
+  --color-gold-dark: #854D0E;
+  --color-gold-light: #FBF8F1;
+  
+  /* Pure AMOLED Palette */
+  --color-dark-bg: #000000;
+  --color-dark-card: #000000;
+  --color-dark-surface: #070709;
+  --color-dark-border: #1E1E22;
+  --color-dark-text: #F5F5F4;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
-    font-size: 16px; /* Base for rem */
+    font-size: 15px;
+    color: #1C1917;
+    background-color: #F7F2E7;
   }
 
-  /* Fluid Base for Mobile Shrinkage */
-  @media (max-width: 640px) {
-    html {
-      font-size: 14px; /* Global scale-down for mobile assets */
-    }
+  html.dark {
+    color: #F5F5F4;
+    background-color: #000000;
   }
 
   body {
-    @apply bg-gold-sand text-[#1A1A1A] font-sans text-base transition-colors duration-300 antialiased selection:bg-gold-rich/30;
+    background-color: #F7F2E7;
+    color: #1C1917;
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    selection-background-color: rgba(180, 83, 9, 0.25);
   }
-  
+
   .dark body {
-    @apply bg-dark-bg text-dark-text;
+    background-color: #000000;
+    color: #F5F5F4;
+    selection-background-color: rgba(245, 158, 11, 0.35);
   }
 
-  /* The Bonsai Document Container */
+  /* Unified Legal Stationery Canvas */
   .prose-container {
-    @apply bg-white shadow-inner min-h-[800px] mx-auto transition-all duration-500 ring-1 ring-gold-rich/10;
-    padding: clamp(1.5rem, 6vw, 6rem);
+    background-color: #FFFFFF;
+    color: #1C1917;
+    box-shadow: 0 4px 20px -2px rgba(28, 25, 23, 0.08), 0 0 0 1px rgba(28, 25, 23, 0.08);
+    border-radius: 1rem;
+    min-height: 750px;
+    margin: 0 auto;
+    transition: all 0.25s ease;
+    padding: clamp(1.75rem, 4vw, 4rem);
     width: 100%;
-    max-width: 800px; /* More curated width for "Bonsai" feel */
+    max-width: 880px;
   }
 
+  /* Pure AMOLED Canvas */
   .dark .prose-container {
-    @apply bg-[#FCFAF5] shadow-2xl ring-gold-rich/20; 
+    background-color: #000000;
+    color: #F5F5F4;
+    border: 1px solid #1E1E22;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 1), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Authoritative Legal Typography */
+  .prose {
+    color: #1C1917;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    line-height: 1.85;
+  }
+
+  .dark .prose {
+    color: #E4E4E7;
   }
 
   .prose h1 {
-    @apply text-black text-center mb-8 uppercase tracking-[0.25em] leading-tight font-black italic;
-    font-size: clamp(1.5rem, 5vw, 2rem);
+    color: #1C1917;
+    text-align: center;
+    margin-top: 1.25rem;
+    margin-bottom: 1.75rem;
+    font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+    font-weight: 800;
     font-family: var(--font-serif);
+    letter-spacing: 0.06em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    border-bottom: 2px solid rgba(28, 25, 23, 0.18);
+    padding-bottom: 1rem;
   }
+
+  .dark .prose h1 {
+    color: #FFFFFF;
+    border-bottom-color: #27272A;
+  }
+
   .prose h2 {
-    @apply text-black mt-10 mb-5 border-b border-black/20 pb-2 tracking-widest font-bold uppercase;
-    font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+    color: #1C1917;
+    margin-top: 2.25rem;
+    margin-bottom: 1rem;
+    font-size: clamp(1.1rem, 2.8vw, 1.35rem);
+    font-weight: 700;
+    font-family: var(--font-serif);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(28, 25, 23, 0.15);
+    padding-bottom: 0.45rem;
+  }
+
+  .dark .prose h2 {
+    color: #FFFFFF;
+    border-bottom-color: #222226;
+  }
+
+  .prose h3 {
+    color: #1C1917;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    font-weight: 700;
     font-family: var(--font-serif);
   }
+
+  .dark .prose h3 {
+    color: #F4F4F5;
+  }
+
   .prose p {
-    @apply text-black mb-5 text-justify leading-relaxed;
-    font-size: clamp(0.95rem, 3.5vw, 1.05rem); 
-    font-family: var(--font-serif);
+    color: #1C1917;
+    margin-bottom: 1.25rem;
+    text-align: justify;
+    line-height: 1.85;
   }
-  .prose strong {
-    @apply font-black text-black;
+
+  .dark .prose p {
+    color: #E4E4E7;
   }
+
+  .prose strong, .prose b {
+    font-weight: 700;
+    color: #1C1917;
+  }
+
+  .dark .prose strong, .dark .prose b {
+    color: #FFFFFF;
+  }
+
   .prose li {
-    @apply text-black mb-3 ml-5 list-decimal marker:font-black;
-    font-size: clamp(0.95rem, 3.5vw, 1.05rem);
-    font-family: var(--font-serif);
+    color: #1C1917;
+    margin-bottom: 0.6rem;
+    margin-left: 1.5rem;
+    line-height: 1.75;
   }
+
+  .dark .prose li {
+    color: #E4E4E7;
+  }
+
+  .prose blockquote {
+    border-left: 3px solid #854D0E;
+    padding-left: 1.25rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: #44403C;
+  }
+
+  .dark .prose blockquote {
+    color: #D4D4D8;
+    border-left-color: #D97706;
+    background-color: #0C0A09;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.25rem;
+  }
+
+  .prose hr {
+    border: none;
+    border-top: 1px solid rgba(28, 25, 23, 0.15);
+    margin: 2.25rem 0;
+  }
+
+  .dark .prose hr {
+    border-top-color: #27272A;
+  }
+
+  /* Legal Tables - Crisp AMOLED Styling */
+  .prose table {
+    width: 100%;
+    margin: 1.75rem 0;
+    border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border: 1px solid rgba(28, 25, 23, 0.2);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .dark .prose table {
+    border-color: #27272A;
+    background-color: #050505;
+  }
+
+  .prose thead {
+    background-color: #F7F2E7;
+    border-bottom: 2px solid rgba(28, 25, 23, 0.25);
+  }
+
+  .dark .prose thead {
+    background-color: #121215;
+    border-bottom: 2px solid #27272A;
+  }
+
+  .prose th {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(28, 25, 23, 0.15);
+    font-weight: 700;
+    color: #1C1917;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    text-align: left;
+  }
+
+  .dark .prose th {
+    color: #FFFFFF;
+    border-color: #222226;
+  }
+
+  .prose td {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(28, 25, 23, 0.12);
+    color: #1C1917;
+    vertical-align: top;
+    font-family: var(--font-sans);
+  }
+
+  .dark .prose td {
+    color: #E4E4E7;
+    border-color: #1A1A1E;
+  }
+
+  .prose tr:nth-child(even) td {
+    background-color: rgba(247, 242, 231, 0.45);
+  }
+
+  .dark .prose tr:nth-child(even) td {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+}
+
+/* Design Language Utility Classes */
+.gold-shadow {
+  box-shadow: 0 4px 16px -2px rgba(133, 77, 14, 0.12);
+}
+
+.dark .gold-shadow {
+  box-shadow: 0 4px 20px -2px rgba(217, 119, 6, 0.15);
 }
 
 .gold-gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-gold-dark via-gold-rich to-gold-dark;
-}
-
-.gold-shadow {
-  box-shadow: 0 10px 40px rgba(153, 101, 21, 0.2);
-}
-
-.paper-texture {
-  background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
-}
-
-.vibrant-card {
-  @apply bg-white/90 backdrop-blur-xl border border-gold-rich/30 rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-gold-rich/20;
-}
-
-.dark .vibrant-card {
-  @apply bg-dark-card/90 border-dark-border shadow-black/40;
+  color: #1C1917;
+  letter-spacing: 0.15em;
 }
 
 .dark .gold-gradient-text {
-  @apply from-gold-rich via-gold-light to-gold-rich;
+  color: #FFFFFF;
 }
 
-.dark .bg-gold-light\/90 {
-  @apply bg-dark-card/95;
+.vibrant-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E7E1D4;
+  border-radius: 1rem;
 }
 
-.dark .bg-gold-light\/30 {
-  @apply bg-dark-bg/50;
-}
-
-.dark .bg-gold-light\/50 {
-  @apply bg-dark-card/80;
-}
-
-.dark .text-gold-dark {
-  @apply text-gold-rich;
-}
-
-.dark .text-gold-dark\/60 {
-  @apply text-gold-light/60;
-}
-
-.dark .text-gold-dark\/40 {
-  @apply text-gold-light/40;
-}
-
-.dark .bg-white\/50 {
-  @apply bg-dark-bg/40;
-}
-
-.dark .bg-white\/80 {
-  @apply bg-dark-bg/60;
-}
-
-.dark .bg-white\/30 {
-  @apply bg-dark-bg/30;
+.dark .vibrant-card {
+  background-color: #000000;
+  border-color: #1E1E22;
 }
 
 .elegant-button {
-  @apply px-4 py-2 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-xl;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Custom Scrollbar */
+/* Paper texture subtle touch - Warm in light, AMOLED ambient in dark */
+.paper-texture {
+  background-image: radial-gradient(rgba(180, 83, 9, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dark .paper-texture {
+  background-image: radial-gradient(rgba(245, 158, 11, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Clean Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gold-sand;
-}
-
-.dark ::-webkit-scrollbar-track {
-  @apply bg-dark-bg;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gold-rich/30 rounded-full hover:bg-gold-rich/50 transition-colors;
+  background: rgba(133, 77, 14, 0.25);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(133, 77, 14, 0.45);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 119, 6, 0.55);
 }
